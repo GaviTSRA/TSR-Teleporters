@@ -1,0 +1,5 @@
+name: Teleporters
+version: '${project.version}'
+main: me.gavitsra.teleporters.Teleporters
+api-version: 1.19
+authors: [ GaviTSRA ]
