@@ -72,7 +72,8 @@ public class Update extends BukkitRunnable {
             }
             for (Entity entity : world.getEntities().stream().filter(e -> e.getType() == EntityType.MARKER).toList()) {
                 if (entity.getPersistentDataContainer().has(isTeleporter, PersistentDataType.BYTE)) {
-                    if (entity.getPersistentDataContainer().has(isPortable, PersistentDataType.BYTE)) {
+                    if (entity.getPersistentDataContainer().has(isPortable, PersistentDataType.BYTE) &&
+                        entity.getPersistentDataContainer().get(isPortable, PersistentDataType.BYTE) == (byte) 1) {
                         entity.getWorld().spawnParticle(Particle.TOTEM, entity.getLocation(), 15, .0, 0, .0, .4);
                         continue;
                     }
