@@ -2,8 +2,10 @@ package me.gavitsra.teleporters.listeners;
 
 import me.gavitsra.teleporters.Teleporters;
 import me.gavitsra.teleporters.tasks.EchoReturn;
+import me.gavitsra.teleporters.tasks.Teleport;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
@@ -21,7 +23,8 @@ public class SneakListener implements Listener {
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent event) {
         if (event.isSneaking()) {
-            Location loc = event.getPlayer().getLocation();
+            Player player = event.getPlayer();
+            Location loc = player.getLocation();
 
             if (Teleporters.getInstance().teleporting.contains(event.getPlayer())) return;
 
@@ -40,12 +43,12 @@ public class SneakListener implements Listener {
                 }
             }
 
-            ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
+            ItemStack item = player.getInventory().getItemInMainHand();
             if(item.hasItemMeta()) {
                 if (item.getItemMeta().hasLore()) {
                     if(item.getItemMeta().getLore().get(0).equals(ChatColor.GOLD + "Portable Teleporter")) {
                         String id = item.getItemMeta().getDisplayName();
-                        Teleporters.getInstance().teleportPlayerToPlatform(id, event.getPlayer());
+                        Teleporters.getInstance().teleportPlayerToPlatform(id, player);
                         int uses = Integer.parseInt(item.getItemMeta().getLore().get(1).split(" ")[0].split("")[2]);
 
                         List<String> lore = new ArrayList<>();
@@ -57,14 +60,23 @@ public class SneakListener implements Listener {
                         item.setItemMeta(meta);
 
                         if (uses-1 < 1) {
-                            event.getPlayer().getInventory().remove(item);
-                            event.getPlayer().getWorld().playSound(event.getPlayer().getLocation(), Sound.ITEM_SHIELD_BREAK, 1, 1);
+                            player.getInventory().remove(item);
+                            player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BREAK, 1, 1);
                         }
                     } else if(item.getItemMeta().getLore().get(0).equals(ChatColor.DARK_AQUA + "Echoing Teleporter")) {
-                        if (event.getPlayer().hasCooldown(Material.ECHO_SHARD)) return;
-                        event.getPlayer().setCooldown(Material.ECHO_SHARD, 20 * 60 * 5);
-                        new EchoReturn(event.getPlayer(), event.getPlayer().getLocation()).run();
-                        Teleporters.getInstance().teleportPlayerToPlatform(item.getItemMeta().getDisplayName(), event.getPlayer());
+                        if (Teleporters.getInstance().echoing.containsKey(player)) {
+                            Location toLoc = Teleporters.getInstance().echoing.get(player);
+                            Teleporters.getInstance().teleportPlayerToLocation(toLoc, player);
+                            player.setCooldown(Material.ECHO_SHARD, 20 * 60 * 4);
+                            Teleporters.getInstance().echoing.remove(player);
+                            return;
+                        }
+
+                        if (player.hasCooldown(Material.ECHO_SHARD)) return;
+                        Teleporters.getInstance().echoing.put(player, player.getLocation());
+                        player.setCooldown(Material.ECHO_SHARD, 20 * 60);
+                        new EchoReturn(player, player.getLocation()).run();
+                        Teleporters.getInstance().teleportPlayerToPlatform(item.getItemMeta().getDisplayName(), player);
                     }
                 }
             }

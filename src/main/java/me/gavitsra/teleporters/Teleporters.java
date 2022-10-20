@@ -15,6 +15,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 public final class Teleporters extends JavaPlugin {
     private static Teleporters instance;
     public List<Player> teleporting;
+    public HashMap<Player, Location> echoing;
     private NamespacedKey isTeleporter;
 
     @Override
@@ -29,6 +31,7 @@ public final class Teleporters extends JavaPlugin {
         instance = this;
         isTeleporter = new NamespacedKey(instance, "is_teleporter");
         teleporting = new ArrayList<>();
+        echoing = new HashMap<>();
 
         // Plugin startup logic
         getServer().getPluginManager().registerEvents(new SneakListener(), this);
