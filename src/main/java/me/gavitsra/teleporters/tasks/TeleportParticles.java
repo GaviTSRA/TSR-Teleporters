@@ -26,19 +26,38 @@ public class TeleportParticles extends BukkitRunnable {
     public void run() {
         List<Location> locations = new ArrayList<>();
 
-        locations.add(loc.clone().add(distance / 100f, distance / 100f, distance / 100f));
-        locations.add(loc.clone().add(distance / 100f, distance / 100f, 0));
+        locations.add(loc.clone().add(-distance / 100f, -distance / 100f, -distance / 100f));
+        locations.add(loc.clone().add(-distance / 100f, -distance / 100f, 0));
+        locations.add(loc.clone().add(-distance / 100f, -distance / 100f, distance / 100f));
+        locations.add(loc.clone().add(0, -distance / 100f, -distance / 100f));
+        locations.add(loc.clone().add(0, -distance / 100f, 0));
+        locations.add(loc.clone().add(0, -distance / 100f, distance / 100f));
+        locations.add(loc.clone().add(distance / 100f, -distance / 100f, -distance / 100f));
+        locations.add(loc.clone().add(distance / 100f, -distance / 100f, 0));
+        locations.add(loc.clone().add(distance / 100f, -distance / 100f, distance / 100f));
+
+        locations.add(loc.clone().add(-distance / 100f, 0, -distance / 100f));
+        locations.add(loc.clone().add(-distance / 100f, 0, 0));
+        locations.add(loc.clone().add(-distance / 100f, 0, distance / 100f));
+        locations.add(loc.clone().add(0, 0, -distance / 100f));
+        locations.add(loc.clone().add(0, 0, 0));
+        locations.add(loc.clone().add(0, 0, distance / 100f));
+        locations.add(loc.clone().add(distance / 100f, 0, -distance / 100f));
+        locations.add(loc.clone().add(distance / 100f, 0, 0));
+        locations.add(loc.clone().add(distance / 100f, 0, distance / 100f));
+
+        locations.add(loc.clone().add(-distance / 100f, distance / 100f, -distance / 100f));
         locations.add(loc.clone().add(-distance / 100f, distance / 100f, 0));
         locations.add(loc.clone().add(-distance / 100f, distance / 100f, distance / 100f));
-        locations.add(loc.clone().add(distance / 100f, distance / 100f, -distance / 100f));
-        locations.add(loc.clone().add(0, distance / 100f, distance / 100f));
         locations.add(loc.clone().add(0, distance / 100f, -distance / 100f));
         locations.add(loc.clone().add(0, distance / 100f, 0));
-        locations.add(loc.clone().add(0, -distance / 100f, 0));
-        locations.add(loc.clone().add(-distance / 100f, distance / 100f, -distance / 100f));
+        locations.add(loc.clone().add(0, distance / 100f, distance / 100f));
+        locations.add(loc.clone().add(distance / 100f, distance / 100f, -distance / 100f));
+        locations.add(loc.clone().add(distance / 100f, distance / 100f, 0));
+        locations.add(loc.clone().add(distance / 100f, distance / 100f, distance / 100f));
 
         for (Location loc : locations) {
-            world.spawnParticle(Particle.TOTEM, loc, 5, 0, 0, 0, 0);
+            world.spawnParticle(Particle.TOTEM, loc, 3, 0, 0, 0, 0);
         }
 
         locations.clear();
