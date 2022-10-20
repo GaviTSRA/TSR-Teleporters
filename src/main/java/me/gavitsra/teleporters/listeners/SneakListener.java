@@ -5,6 +5,8 @@ import me.gavitsra.teleporters.tasks.EchoReturn;
 import me.gavitsra.teleporters.tasks.Teleport;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,12 +14,16 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class SneakListener implements Listener {
     private final NamespacedKey isTeleporter = new NamespacedKey(Teleporters.getInstance(), "is_teleporter");
+    private final NamespacedKey isPortable = new NamespacedKey(Teleporters.getInstance(), "is_portable");
     private final NamespacedKey teleportTo = new NamespacedKey(Teleporters.getInstance(), "teleport_to");
 
     @EventHandler
@@ -77,9 +83,51 @@ public class SneakListener implements Listener {
                         player.setCooldown(Material.ECHO_SHARD, 20 * 60);
                         new EchoReturn(player, player.getLocation()).run();
                         Teleporters.getInstance().teleportPlayerToPlatform(item.getItemMeta().getDisplayName(), player);
+                    } else if(item.getItemMeta().getLore().get(0).equals(ChatColor.GREEN + "Portable Platform")) {
+                        handlePortablePlatformCreation(player);
                     }
                 }
             }
+        }
+    }
+    private void handlePortablePlatformCreation(Player player) {
+        Stream<Entity> nearby = player.getNearbyEntities(3, 3, 3).stream().filter(entity1 -> entity1.getType() == EntityType.MARKER);
+        nearby = nearby.filter(entity1 -> entity1.getPersistentDataContainer().has(isTeleporter, PersistentDataType.BYTE));
+        if (nearby.findAny().isPresent()) return;
+
+        if (player.getInventory().getItemInMainHand().getItemMeta().getDisplayName().equals("rename this to the id you want")) {
+            player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, .5f, 1);
+            return;
+        }
+
+        String id = player.getInventory().getItemInMainHand().getItemMeta().getDisplayName();
+
+        for (World world2 : Bukkit.getWorlds()) {
+            for (Entity entity1 : world2.getEntities().stream().filter(e -> e.getType() == EntityType.MARKER).toList()) {
+                if (Objects.equals(entity1.getCustomName(), id)) {
+                    player.getWorld().playSound(player.getLocation(), Sound.ITEM_SHIELD_BLOCK, .5f, 1);
+                    return;
+                }
+            }
+        }
+
+        EntityType e = EntityType.MARKER;
+        Entity res = player.getWorld().spawnEntity(player.getLocation(), e);
+        res.setCustomNameVisible(false);
+        res.setCustomName(id);
+        res.getPersistentDataContainer().set(isTeleporter, PersistentDataType.BYTE, (byte) 1);
+        res.getPersistentDataContainer().set(isPortable, PersistentDataType.BYTE, (byte) 1);
+
+        player.getLocation().getChunk().setForceLoaded(true);
+
+        player.getWorld().spawnParticle(Particle.END_ROD, player.getLocation(), 250, 0, 0, 0, .25);
+        player.getWorld().playSound(player.getLocation(), Sound.BLOCK_BEACON_ACTIVATE, 1, 1f);
+
+        ItemStack stack = player.getInventory().getItemInMainHand();
+        if (stack.getAmount()-1 > 0) {
+            player.getInventory().getItemInMainHand().setAmount(stack.getAmount()-1);
+        } else {
+            player.getInventory().remove(stack);
         }
     }
 }

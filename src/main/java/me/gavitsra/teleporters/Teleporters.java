@@ -5,12 +5,11 @@ import me.gavitsra.teleporters.listeners.SneakListener;
 import me.gavitsra.teleporters.tasks.Teleport;
 import me.gavitsra.teleporters.tasks.TeleportParticles;
 import me.gavitsra.teleporters.tasks.Update;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -25,11 +24,13 @@ public final class Teleporters extends JavaPlugin {
     public List<Player> teleporting;
     public HashMap<Player, Location> echoing;
     private NamespacedKey isTeleporter;
+    private NamespacedKey isPortable;
 
     @Override
     public void onEnable() {
         instance = this;
         isTeleporter = new NamespacedKey(instance, "is_teleporter");
+        isPortable = new NamespacedKey(Teleporters.getInstance(), "is_portable");
         teleporting = new ArrayList<>();
         echoing = new HashMap<>();
 
@@ -74,6 +75,7 @@ public final class Teleporters extends JavaPlugin {
             new TeleportParticles(player.getWorld(), entityTo.getLocation(), count, player.getLocation()).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
         }
         new Teleport(player, entityTo.getLocation()).runTaskLater(Teleporters.getInstance(), 100);
+        handlePortablePlatformRemoval(entityTo);
     }
 
     public void teleportPlayerToLocation(Location loc, Player player) {
@@ -86,5 +88,20 @@ public final class Teleporters extends JavaPlugin {
             new TeleportParticles(player.getWorld(), loc, count, player.getLocation()).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
         }
         new Teleport(player, loc).runTaskLater(Teleporters.getInstance(), 100);
+    }
+
+    public void handlePortablePlatformRemoval(Entity entityTo) {
+        if (!entityTo.getPersistentDataContainer().has(isPortable, PersistentDataType.BYTE)) return;
+        if (entityTo.getPersistentDataContainer().get(isPortable, PersistentDataType.BYTE) != (byte) 1) return;
+
+        ItemStack item = new ItemStack(Material.AMETHYST_SHARD);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(entityTo.getCustomName());
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatColor.GREEN + "Portable Platform");
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        entityTo.getWorld().dropItem(entityTo.getLocation(), item);
+        entityTo.remove();
     }
 }

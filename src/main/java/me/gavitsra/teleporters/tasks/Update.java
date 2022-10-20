@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 public class Update extends BukkitRunnable {
     private final NamespacedKey isTeleporter = new NamespacedKey(Teleporters.getInstance(), "is_teleporter");
     private final NamespacedKey teleportTo = new NamespacedKey(Teleporters.getInstance(), "teleport_to");
+    private final NamespacedKey isPortable = new NamespacedKey(Teleporters.getInstance(), "is_portable");
 
     @Override
     public void run() {
@@ -54,11 +55,27 @@ public class Update extends BukkitRunnable {
                         Material.ECHO_SHARD, Material.AMETHYST_SHARD, ChatColor.DARK_AQUA + "Echoing Core",
                         Particle.END_ROD, Sound.BLOCK_ENCHANTMENT_TABLE_USE
                 );
+                handleItemCreation(
+                        world, entity,
+                        ChatColor.GREEN + "Teleporter Core", Material.AMETHYST_SHARD, ChatColor.GREEN + "Teleporter Core",
+                        Material.DIAMOND_BLOCK, Material.AMETHYST_SHARD, null,
+                        Particle.ENCHANTMENT_TABLE, Sound.BLOCK_ENCHANTMENT_TABLE_USE
+                );
+                handleItemCreation(
+                        world, entity,
+                        "rename this to the id you want", Material.AMETHYST_SHARD, ChatColor.GREEN + "Portable Platform",
+                        Material.AMETHYST_SHARD, Material.EMERALD_BLOCK, ChatColor.GREEN + "Teleporter Core",
+                        Particle.ENCHANTMENT_TABLE, Sound.BLOCK_ENCHANTMENT_TABLE_USE
+                );
                 handlePlatformCreation(world, entity);
                 handlePlatformLinking(world, entity);
             }
             for (Entity entity : world.getEntities().stream().filter(e -> e.getType() == EntityType.MARKER).toList()) {
                 if (entity.getPersistentDataContainer().has(isTeleporter, PersistentDataType.BYTE)) {
+                    if (entity.getPersistentDataContainer().has(isPortable, PersistentDataType.BYTE)) {
+                        entity.getWorld().spawnParticle(Particle.TOTEM, entity.getLocation(), 15, .0, 0, .0, .4);
+                        continue;
+                    }
                     Location loc = entity.getLocation();
                     loc = new Location(world, loc.getBlockX() + .5, loc.getBlockY() + .5, loc.getBlockZ() + .5);
                     if(
