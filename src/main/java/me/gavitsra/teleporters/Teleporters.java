@@ -63,18 +63,27 @@ public final class Teleporters extends JavaPlugin {
         return nearby.toList().get(0);
     }
 
-    public void teleportPlayerToPlatform(String id, Player player) {
+    public void teleportPlayerToPlatform(String id, Player player, boolean fast) {
         Entity entityTo = getPlatformByID(id);
-
         Teleporters.getInstance().teleporting.add(player);
 
-        int count = 1000;
-        while (count > 0) {
-            count -= 1;
-            new TeleportParticles(player.getWorld(), player.getLocation(), count, entityTo.getLocation()).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
-            new TeleportParticles(player.getWorld(), entityTo.getLocation(), count, player.getLocation()).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
+        if (fast) {
+            int count = 10;
+            while (count > 0) {
+                count -= 1;
+                new TeleportParticles(player.getWorld(), player.getLocation(), count*200, entityTo.getLocation(), Particle.END_ROD, 2, .01f).runTaskLater(Teleporters.getInstance(), (10 - count));
+                new TeleportParticles(player.getWorld(), entityTo.getLocation(), count*200, player.getLocation(), Particle.END_ROD, 2, .01f).runTaskLater(Teleporters.getInstance(), (10 - count));
+            }
+            new Teleport(player, entityTo.getLocation()).runTaskLater(Teleporters.getInstance(), 10);
+        } else {
+            int count = 1000;
+            while (count > 0) {
+                count -= 1;
+                new TeleportParticles(player.getWorld(), player.getLocation(), count, entityTo.getLocation(), Particle.TOTEM, 0, 0).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
+                new TeleportParticles(player.getWorld(), entityTo.getLocation(), count, player.getLocation(), Particle.TOTEM , 0, 0).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
+            }
+            new Teleport(player, entityTo.getLocation()).runTaskLater(Teleporters.getInstance(), 100);
         }
-        new Teleport(player, entityTo.getLocation()).runTaskLater(Teleporters.getInstance(), 100);
         handlePortablePlatformRemoval(entityTo);
     }
 
@@ -84,8 +93,8 @@ public final class Teleporters extends JavaPlugin {
         int count = 1000;
         while (count > 0) {
             count -= 1;
-            new TeleportParticles(player.getWorld(), player.getLocation(), count, loc).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
-            new TeleportParticles(player.getWorld(), loc, count, player.getLocation()).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
+            new TeleportParticles(player.getWorld(), player.getLocation(), count, loc, Particle.TOTEM, 0, 0).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
+            new TeleportParticles(player.getWorld(), loc, count, player.getLocation(), Particle.TOTEM, 0, 0).runTaskLater(Teleporters.getInstance(), (1000 - count)/10L);
         }
         new Teleport(player, loc).runTaskLater(Teleporters.getInstance(), 100);
     }

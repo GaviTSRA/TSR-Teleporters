@@ -14,12 +14,18 @@ public class TeleportParticles extends BukkitRunnable {
     Location loc;
     int distance;
     Location locTo;
+    Particle particle;
+    int countMultiplier;
+    float speed;
 
-    public TeleportParticles(World world, Location loc, int distance, Location to) {
+    public TeleportParticles(World world, Location loc, int distance, Location to, Particle particle, int countMultiplier, float speed) {
         this.world = world;
         this.loc = loc;
         this.distance = distance;
         this.locTo = to;
+        this.particle = particle;
+        this.countMultiplier = countMultiplier;
+        this.speed = speed;
     }
 
     @Override
@@ -57,7 +63,7 @@ public class TeleportParticles extends BukkitRunnable {
         locations.add(loc.clone().add(distance / 100f, distance / 100f, distance / 100f));
 
         for (Location loc : locations) {
-            world.spawnParticle(Particle.TOTEM, loc, 3, 0, 0, 0, 0);
+            world.spawnParticle(this.particle, loc, 3*this.countMultiplier, 0, 0, 0, this.speed);
         }
 
         locations.clear();

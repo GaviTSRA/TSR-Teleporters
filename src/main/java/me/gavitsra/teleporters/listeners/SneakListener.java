@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
+import java.security.spec.NamedParameterSpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -25,6 +26,7 @@ public class SneakListener implements Listener {
     private final NamespacedKey isTeleporter = new NamespacedKey(Teleporters.getInstance(), "is_teleporter");
     private final NamespacedKey isPortable = new NamespacedKey(Teleporters.getInstance(), "is_portable");
     private final NamespacedKey teleportTo = new NamespacedKey(Teleporters.getInstance(), "teleport_to");
+    private final NamespacedKey isFastTeleporter = new NamespacedKey(Teleporters.getInstance(), "fast_teleporter");
 
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent event) {
@@ -45,7 +47,11 @@ public class SneakListener implements Listener {
 
                 if (entity.getLocation().distance(loc) < 1.5) {
                     String id = entity.getPersistentDataContainer().get(teleportTo, PersistentDataType.STRING);
-                    Teleporters.getInstance().teleportPlayerToPlatform(id, event.getPlayer());
+                    boolean fast = false;
+                    if (entity.getPersistentDataContainer().has(isFastTeleporter, PersistentDataType.BYTE)) {
+                        fast = entity.getPersistentDataContainer().get(isFastTeleporter, PersistentDataType.BYTE) == (byte) 1;
+                    }
+                    Teleporters.getInstance().teleportPlayerToPlatform(id, event.getPlayer(), fast);
                 }
             }
 
@@ -54,7 +60,7 @@ public class SneakListener implements Listener {
                 if (item.getItemMeta().hasLore()) {
                     if(item.getItemMeta().getLore().get(0).equals(ChatColor.GOLD + "Portable Teleporter")) {
                         String id = item.getItemMeta().getDisplayName();
-                        Teleporters.getInstance().teleportPlayerToPlatform(id, player);
+                        Teleporters.getInstance().teleportPlayerToPlatform(id, player, false);
                         int uses = Integer.parseInt(item.getItemMeta().getLore().get(1).split(" ")[0].split("")[2]);
 
                         List<String> lore = new ArrayList<>();
@@ -82,7 +88,7 @@ public class SneakListener implements Listener {
                         Teleporters.getInstance().echoing.put(player, player.getLocation());
                         player.setCooldown(Material.ECHO_SHARD, 20 * 60);
                         new EchoReturn(player, player.getLocation()).run();
-                        Teleporters.getInstance().teleportPlayerToPlatform(item.getItemMeta().getDisplayName(), player);
+                        Teleporters.getInstance().teleportPlayerToPlatform(item.getItemMeta().getDisplayName(), player, false);
                     } else if(item.getItemMeta().getLore().get(0).equals(ChatColor.GREEN + "Portable Platform")) {
                         handlePortablePlatformCreation(player);
                     }
